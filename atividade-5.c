@@ -13,8 +13,10 @@ typedef REGISTRO* FILA;
 void inserir(FILA *f, int chave, char *valor);
 void mostrar(FILA *f);
 void excluir(FILA *f);
+int quantidade(FILA *f);
+char * buscar(FILA *f, int chave);
 
-main () {
+int main () {
 
     FILA f = NULL;
     int opcao, chave;
@@ -24,7 +26,9 @@ main () {
         puts("1. Inserir REGISTRO");
         puts("2. Excluir REGISTRO");
         puts("3. Mostar FILA");
-        puts("4. Sair");
+        puts("4. Quantidade de REGISTROS");
+        puts("5. Buscar REGISTRO por chave");
+        puts("6. Sair");
         scanf("%i", &opcao);
 
         switch (opcao) {
@@ -44,11 +48,23 @@ main () {
             mostrar(&f);
             break;
 
+        case 4:
+            printf("Quantidade: %i\n", quantidade(&f));
+            break;
+
+        case 5:
+            puts("Informe a chave");
+            scanf("%i", &chave);
+            printf("%s\n", buscar(&f, chave));
+            break;
+
         default:
             break;
         }
 
-    } while (opcao != 4);
+    } while (opcao != 6);
+
+    return 0;
 }
 
 void inserir(FILA *f, int chave, char *valor) {
@@ -80,4 +96,21 @@ void excluir(FILA *f) {
     aux = *f;
     *f = (*f)->prox;
     free(aux);
+}
+
+int quantidade(FILA *f) {
+    if(*f==NULL)
+        return 0;
+    else
+        return 1 + quantidade(&(*f)->prox);
+}
+
+char * buscar(FILA *f, int chave) {
+    if(*f==NULL)
+        return "Chave nao encontrada\n";
+    else
+        if ((*f)->chave == chave)
+            return (*f)->valor;
+        else
+            return buscar(&(*f)->prox, chave);
 }
