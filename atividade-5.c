@@ -10,16 +10,16 @@ typedef struct sRegistro {
 
 typedef REGISTRO* FILA;
 
-void inserir(FILA *f, int chave, char *valor);
+void inserir(FILA *f, int chave, char *valor, int posicao);
 void mostrar(FILA *f);
-void excluir(FILA *f);
+void excluir(FILA *f, int posicao);
 int quantidade(FILA *f);
 char * buscar(FILA *f, int chave);
 
 int main () {
 
     FILA f = NULL;
-    int opcao, chave;
+    int opcao, chave, posicao;
     char valor[100];
 
     do {
@@ -33,15 +33,19 @@ int main () {
 
         switch (opcao) {
         case 1:
+            printf("Informe a posicao (0-%i)", quantidade(&f));
+            scanf("%i", &posicao);
             puts("Entre com a chave");
             scanf("%i", &chave);
             puts("Entre com o valor");
             scanf("%s", valor);
-            inserir(&f, chave, valor);
+            inserir(&f, chave, valor, posicao);
             break;
 
         case 2:
-            excluir(&f);
+            printf("Informe a posicao");
+            scanf("%i", &posicao);
+            excluir(&f, posicao);
             break;
 
         case 3:
@@ -67,15 +71,30 @@ int main () {
     return 0;
 }
 
-void inserir(FILA *f, int chave, char *valor) {
-    if(*f==NULL){
-        *f = (FILA) malloc(sizeof(REGISTRO));
-        (*f)->chave = chave;
-        strcpy((*f)->valor, valor);
-        (*f)->prox = NULL;
+void inserir(FILA *f, int chave, char *valor, int posicao) {
+
+    REGISTRO *novoRegistro;
+
+    novoRegistro = (REGISTRO*) malloc(sizeof(REGISTRO));
+    novoRegistro->chave = chave;
+    strcpy(novoRegistro->valor, valor);
+
+    if (posicao == 0 || *f == NULL) {
+        novoRegistro->prox = *f;
+        *f = novoRegistro;
+    } else {
+        REGISTRO *anterior = NULL;
+        REGISTRO *atual = *f;
+        int contador = 0;
+
+        while (atual != NULL && contador < posicao) {
+            anterior = atual;
+            atual = atual->prox;
+            contador++;
+        }
+        novoRegistro->prox = atual;
+        anterior->prox = novoRegistro;
     }
-    else
-        inserir(&(*f)->prox, chave, valor);
 }
 
 void mostrar(FILA *f) {
@@ -89,13 +108,35 @@ void mostrar(FILA *f) {
     }
 }
 
-void excluir(FILA *f) {
-    REGISTRO *aux;
+void excluir(FILA *f, int posicao) {
+
     if(*f==NULL)
         return;
-    aux = *f;
-    *f = (*f)->prox;
-    free(aux);
+
+    if (posicao == 0) {
+        REGISTRO *aux = *f;
+        *f = (*f)->prox;
+        free(aux);
+        return;
+    }
+
+    REGISTRO *anterior = NULL;
+    REGISTRO *atual = *f;
+    int contador = 0;
+
+    while (atual != NULL && contador < posicao) {
+        anterior = atual;
+        atual = atual->prox;
+        contador++;
+    }
+
+    if (atual == NULL) {
+        printf("Posição inválida\n");
+        return;
+    }
+
+    anterior->prox = atual->prox;
+    free(atual);
 }
 
 int quantidade(FILA *f) {
